@@ -71,7 +71,7 @@ class MarginsDataset(Dataset):
         )
 
         data_pairs = []
-        expected_resolution = (450, 1000)  # PIL devuelve (ancho, alto)
+        expected_resolution = (512, 1024)  # PIL devuelve (ancho, alto)
 
         for fname in real_files:
             if fname in no_margin_files:

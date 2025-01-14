@@ -32,13 +32,15 @@ class PatchGANDiscriminator(nn.Module):
         #    y aumentar la capacidad discriminativa
         self.down4 = self._block(features * 4, features * 8, stride=1)
 
+        self.down5 = self._block(features * 8, features * 8, stride=2)
+
         # 4. Capa final: conv con stride=1 que mapea a un solo canal
         #    (representación de real/fake). No le ponemos activación
         #    porque usaremos una pérdida (ej. BCEWithLogitsLoss)
         #    que aplica sigmoide internamente.
         self.final = nn.Conv2d(features * 8, 1, kernel_size=4, stride=1, padding=1)
 
-    def _block(self, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
+    def _block(self, in_channels, out_channels, kernel_size=3, stride=2, padding=1):
         """
         Bloque de (Conv2d + BatchNorm2d + LeakyReLU).
         Se usa para la 'bajada' típica en el PatchGAN.

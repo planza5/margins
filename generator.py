@@ -15,7 +15,7 @@ class UNetGenerator(nn.Module):
       se suele doblar en cada bajada (downsampling).
     """
 
-    def __init__(self, in_channels=3, out_channels=3, features=64):
+    def __init__(self, in_channels=3, out_channels=3, features=128):
         super(UNetGenerator, self).__init__()
 
         # 1. Definimos el "downsampling" (encoder).
