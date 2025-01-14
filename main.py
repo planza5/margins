@@ -49,13 +49,13 @@ dis = discriminator.getDiscriminator(in_channels=6, features=64).to(device)
 
 # Crear dataset y DataLoader (usar el dataset de entrenamiento)
 dataset = MarginsDataset(
-    dir_real="./Images_450x1000",
-    dir_no_margin="./Images_No_Margin",
     do_normalize=True,
     mode="train",
     split_ratio=0.8,
-    seed=42
+    seed=42,
+    augment_rotation=True  # Habilitar imágenes rotadas
 )
+
 dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
 
 # Definir optimizadores para generador y discriminador
@@ -63,7 +63,7 @@ optim_gen = torch.optim.Adam(gen.parameters(), lr=2e-4, betas=(0.5, 0.999))
 optim_dis = torch.optim.Adam(dis.parameters(), lr=2e-4, betas=(0.5, 0.999))
 
 # Número de épocas de entrenamiento
-num_epochs = 100
+num_epochs = 1
 
 ######################################
 # Ciclo de entrenamiento             #
