@@ -157,4 +157,8 @@ for epoch in range(num_epochs):
 torch.save(gen.state_dict(), "checkpoints/gen_final.pth")
 torch.save(dis.state_dict(), "checkpoints/dis_final.pth")
 
+torch.save(gen, "checkpoints/gen_final_complete.pth")
+
+
+
 print("Entrenamiento finalizado.")
