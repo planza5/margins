@@ -10,7 +10,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Usando dispositivo: {device}")
 
 # Ruta del archivo de pesos
-weights_path = "checkpoints/gen_epoch_60.pth"
+weights_path = "checkpoints/gen_epoch_100.pth"
 
 # Crear instancia del generador
 try:
@@ -40,8 +40,8 @@ def denormalize(tensor):
 ######################################
 # Cargar y procesar la imagen
 ######################################
-image_path = "img_1_b.png"
-output_path = "img_2_b.png"
+image_path = "Images_512x1024_Margin/IMG_0001.jpg"
+output_path = "result.jpg"
 
 try:
     input_image = Image.open(image_path).convert("RGB")

@@ -58,7 +58,8 @@ dataset = MarginsDataset(
     do_normalize=True,
     mode="train",
     split_ratio=0.8,
-    seed=42
+    seed=42,
+    augment_rotation=True
 )
 dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
 
