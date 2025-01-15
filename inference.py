@@ -1,50 +1,65 @@
 import torch
+import torchvision.transforms as transforms
 from PIL import Image
-from torchvision import transforms
+from generator import UNetGenerator
 
-# Cargar el modelo entrenado
-model_path = "checkpoints/gen_final_complete.pth"
-gen = torch.load(model_path)
-gen.eval()  # Establecer en modo evaluación
+######################################
+# Configuración inicial
+######################################
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Usando dispositivo: {device}")
 
+# Ruta del archivo de pesos
+weights_path = "checkpoints/gen_epoch_60.pth"
 
-# Función para procesar una imagen
-def add_borders(input_image_path, output_image_path):
-    """
-    Añade bordes a una imagen de entrada utilizando el modelo entrenado.
+# Crear instancia del generador
+try:
+    # Si guardaste solo los pesos:
+    gen = UNetGenerator(in_channels=3, out_channels=3, features=64).to(device)
+    gen.load_state_dict(torch.load(weights_path, map_location=device))
+    print("Pesos cargados correctamente.")
+except RuntimeError as e:
+    # Si guardaste todo el modelo:
+    print("Cargando el modelo completo...")
+    gen = torch.load(weights_path, map_location=device)
+    gen.to(device)
+    print("Modelo cargado correctamente.")
 
-    :param input_image_path: Ruta de la imagen de entrada.
-    :param output_image_path: Ruta para guardar la imagen de salida.
-    """
-    # Cargar la imagen
-    image = Image.open(input_image_path).convert("RGB")
-    original_size = image.size  # Guardar el tamaño original (ancho, alto)
+# Poner el modelo en modo evaluación
+gen.eval()
 
-    # Preprocesar la imagen
-    preprocess = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Normalizar a [-1, 1]
-    ])
-    image_tensor = preprocess(image).unsqueeze(0).cuda()  # Añadir batch dimension y mover a GPU si está disponible
+######################################
+# Funciones de normalización
+######################################
+def normalize(image):
+    return transforms.ToTensor()(image).unsqueeze(0) * 2 - 1
 
-    # Pasar la imagen por el modelo
-    with torch.no_grad():
-        output_tensor = gen(image_tensor)
+def denormalize(tensor):
+    return transforms.ToPILImage()((tensor.squeeze(0) + 1) / 2)
 
-    # Postprocesar la imagen generada
-    postprocess = transforms.Compose([
-        transforms.Normalize(mean=[-1, -1, -1], std=[2, 2, 2]),  # Desnormalizar de [-1, 1] a [0, 1]
-        transforms.ToPILImage()
-    ])
-    output_image = postprocess(output_tensor.squeeze(0).cpu())
+######################################
+# Cargar y procesar la imagen
+######################################
+image_path = "img_1_b.png"
+output_path = "img_2_b.png"
 
-    # Redimensionar a las dimensiones originales, si es necesario
-    output_image = output_image.resize(original_size)
+try:
+    input_image = Image.open(image_path).convert("RGB")
+    print("Imagen cargada correctamente.")
+except Exception as e:
+    print(f"Error al cargar la imagen: {e}")
+    exit()
 
-    # Guardar la imagen de salida
-    output_image.save(output_image_path)
-    print(f"Imagen guardada en: {output_image_path}")
+# Normalizar la imagen
+input_tensor = normalize(input_image).to(device)
 
+######################################
+# Generar la imagen con márgenes
+######################################
+with torch.no_grad():
+    output_tensor = gen(input_tensor)
 
-# Ejemplo de uso
-add_borders("input_image.jpg", "output_image_with_borders.jpg")
+# Desnormalizar la imagen de salida y guardarla
+output_image = denormalize(output_tensor.cpu())
+output_image.save(output_path)
+print(f"Imagen generada guardada en: {output_path}")
